@@ -2,13 +2,15 @@
   <div>
     <header
       ref="headerRef"
-      class="fixed top-2 left-0 right-0 z-999 flex justify-center pointer-events-none transition-all duration-300"
+      class="fixed top-1 left-0 right-0 z-999 flex justify-center pointer-events-none transition-all duration-300"
     >
       <div
         :class="[
-          'flex items-center h-10 max-w-[480px] w-[calc(100%_-_24px)] backdrop-blur-2xl border rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] pointer-events-auto transition-all duration-300 overflow-hidden',
+          'flex items-center h-9 max-w-[360px] w-[calc(100%_-_24px)] backdrop-blur-2xl border rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)] pointer-events-auto transition-all duration-300 overflow-hidden',
           'theme-card',
+          'relative isolate bg-[var(--liquid-shell-bg)] backdrop-saturate-150 backdrop-blur-[22px]',
           messageVisible ? messageStyles[messageType].shell : '',
+          props.transparent && !messageVisible ? 'app-header--transparent' : '',
           props.notifyOnly && !messageVisible
             ? 'opacity-0 scale-95 pointer-events-none !border-transparent !shadow-none !bg-transparent'
             : '',
@@ -23,68 +25,113 @@
           leave-from-class="opacity-100 scale-100"
           leave-to-class="opacity-0 scale-95"
         >
-          <div v-if="messageVisible" key="message" class="flex items-center w-full px-4 gap-2.5">
+          <div
+            v-if="messageVisible"
+            key="message"
+            class="relative z-[1] flex items-center w-full px-4 gap-2.5"
+          >
             <i :class="['text-[14px] shrink-0', messageStyles[messageType].icon]"></i>
             <span :class="['text-[13px] leading-5 truncate', messageStyles[messageType].text]">
               {{ messageContent }}
             </span>
           </div>
 
-          <div v-else-if="!props.notifyOnly" key="default" class="flex items-center w-full h-full">
+          <div
+            v-else-if="!props.notifyOnly"
+            key="default"
+            class="relative z-[1] flex items-center w-full h-full"
+          >
             <slot name="content">
-              <div
-                class="flex items-center flex-1 min-w-0 h-6 pl-4 pr-2 overflow-hidden ml-auto mr-3 shrink-0 gap-3 pointer-events-auto"
-              >
-                <div
-                  class="welcome-sequence"
-                  :class="isDark ? 'welcome-sequence--dark' : 'welcome-sequence--light'"
-                >
-                  <div
-                    class="welcome-sequence-logo h-5 w-5 flex items-center justify-center"
-                    :class="{ 'is-visible': welcomePhase !== 'text' }"
-                  >
+              <template v-if="props.iconsOnly">
+                <div class="flex items-center justify-between w-full h-full px-3 pointer-events-auto">
+                  <div class="h-5 w-5 flex items-center justify-center opacity-80">
                     <img
                       src="/logo.png"
                       alt="App Logo"
                       class="max-h-full max-w-full object-contain"
+                      :class="isDark ? 'header-logo-mono-dark' : 'header-logo-mono-light'"
                     />
                   </div>
-
-                  <span
-                    class="welcome-sequence-text"
-                    :class="{ 'is-visible': welcomePhase === 'text' }"
+                  <div class="flex items-center gap-3">
+                    <a
+                      v-if="props.showGithub"
+                      :href="githubUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
+                      aria-label="GitHub"
+                      title="GitHub"
+                    >
+                      <i class="ri-github-line text-[19px]"></i>
+                    </a>
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
+                    :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                    @click="themeStore.toggle()"
                   >
-                    {{ welcomeText }}
-                  </span>
+                    <i v-if="isDark" class="ri-sun-fill text-[17px]"></i>
+                    <i v-else class="ri-moon-clear-fill text-[17px]"></i>
+                  </button>
+                  </div>
                 </div>
-              </div>
+              </template>
 
-              <div class="flex items-center ml-auto mr-3 shrink-0 gap-3 pointer-events-auto">
-                <a
-                  v-if="props.showGithub"
-                  :href="githubUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
-                  aria-label="GitHub"
-                  title="GitHub"
+              <template v-else>
+                <div
+                  class="flex items-center flex-1 min-w-0 h-6 pl-4 pr-2 overflow-hidden ml-auto mr-3 shrink-0 gap-3 pointer-events-auto"
                 >
-                  <i class="ri-github-line text-[19px]"></i>
-                </a>
-                <button
-                  type="button"
-                  class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
-                  :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-                  @click="themeStore.toggle()"
-                >
-                  <i v-if="isDark" class="ri-sun-fill text-[17px]"></i>
-                  <i v-else class="ri-moon-clear-fill text-[17px]"></i>
-                </button>
-              </div>
+                  <div
+                    class="welcome-sequence"
+                    :class="isDark ? 'welcome-sequence--dark' : 'welcome-sequence--light'"
+                  >
+                    <div
+                      class="welcome-sequence-logo h-5 w-5 flex items-center justify-center"
+                      :class="{ 'is-visible': welcomePhase !== 'text' }"
+                    >
+                      <img
+                        src="/logo.png"
+                        alt="App Logo"
+                        class="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+
+                    <span
+                      class="welcome-sequence-text"
+                      :class="{ 'is-visible': welcomePhase === 'text' }"
+                    >
+                      {{ welcomeText }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-center ml-auto mr-3 shrink-0 gap-3 pointer-events-auto">
+                  <a
+                    v-if="props.showGithub"
+                    :href="githubUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
+                    aria-label="GitHub"
+                    title="GitHub"
+                  >
+                    <i class="ri-github-line text-[19px]"></i>
+                  </a>
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center h-6 w-6 transition-colors rounded-md header-action-btn"
+                    :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                    @click="themeStore.toggle()"
+                  >
+                    <i v-if="isDark" class="ri-sun-fill text-[17px]"></i>
+                    <i v-else class="ri-moon-clear-fill text-[17px]"></i>
+                  </button>
+                </div>
+              </template>
             </slot>
           </div>
 
-          <div v-else key="notify-placeholder" class="w-full h-full"></div>
+          <div v-else key="notify-placeholder" class="relative z-[1] w-full h-full"></div>
         </transition>
       </div>
     </header>
@@ -107,6 +154,8 @@ const props = defineProps({
   scrolled: { type: Boolean, default: false },
   showGithub: { type: Boolean, default: true },
   notifyOnly: { type: Boolean, default: false },
+  transparent: { type: Boolean, default: false },
+  iconsOnly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['logout']);
@@ -278,10 +327,10 @@ defineExpose({
   opacity: 0;
   filter: blur(5px);
   transition:
-    opacity 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--theme-transition-duration) var(--theme-transition-easing),
+    transform var(--theme-transition-duration) var(--theme-transition-easing),
+    filter var(--theme-transition-duration) var(--theme-transition-easing),
+    color var(--theme-transition-duration) var(--theme-transition-easing);
 }
 
 .welcome-sequence-logo {
@@ -319,5 +368,21 @@ defineExpose({
 .header-action-btn:hover {
   color: var(--text-primary);
   background-color: var(--action-hover-bg);
+}
+
+.header-logo-mono-light {
+  filter: grayscale(1) brightness(0);
+}
+
+.header-logo-mono-dark {
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
+.app-header--transparent {
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 </style>

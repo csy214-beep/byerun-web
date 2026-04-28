@@ -133,7 +133,27 @@ function parseTrack(rawTrack) {
 
   const points = [];
   for (const item of parsed) {
-    const [lngRaw, latRaw] = String(item || '').split('-');
+    let lngRaw;
+    let latRaw;
+
+    if (Array.isArray(item) && item.length >= 2) {
+      [lngRaw, latRaw] = item;
+    } else if (item && typeof item === 'object') {
+      lngRaw = item.lng ?? item.lon ?? item.longitude;
+      latRaw = item.lat ?? item.latitude;
+    } else {
+      const text = String(item || '').trim();
+      if (!text) continue;
+      if (text.includes(',')) {
+        [lngRaw, latRaw] = text.split(',');
+      } else {
+        const matched = text.match(/^(-?\d+(?:\.\d+)?)\-(-?\d+(?:\.\d+)?)$/);
+        if (!matched) continue;
+        lngRaw = matched[1];
+        latRaw = matched[2];
+      }
+    }
+
     const lng = Number(lngRaw);
     const lat = Number(latRaw);
     if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue;

@@ -1,6 +1,8 @@
 <template>
   <div class="club-page min-h-full pb-4">
-    <section class="mt-3 rounded-2xl theme-card p-3">
+    <section
+      :class="['mt-3 rounded-2xl theme-card p-3', showDateDropdown ? 'club-toolbar-elevated' : '']"
+    >
       <div class="grid grid-cols-2 gap-2">
         <button
           v-for="tab in MAIN_TABS"
@@ -73,7 +75,7 @@
           <transition name="fade-slide">
             <div
               v-if="showDateDropdown"
-              class="absolute left-0 right-0 top-11 z-30 rounded-xl theme-card-strong max-h-44 overflow-y-auto"
+              class="absolute left-0 right-0 z-50 rounded-xl theme-card-strong max-h-80 overflow-y-auto"
             >
               <button
                 v-for="day in dateOptions"
@@ -168,7 +170,9 @@
                     >· {{ signTaskCard.location }}</span
                   >
                 </h3>
-                <p class="mt-1 text-xs theme-accent opacity-80 truncate">{{ signTaskCard.subTitle }}</p>
+                <p class="mt-1 text-xs theme-accent opacity-80 truncate">
+                  {{ signTaskCard.subTitle }}
+                </p>
               </div>
               <div class="flex items-center gap-2">
                 <span
@@ -309,7 +313,9 @@
               <span :class="task.statusClass">{{ task.statusText }}</span>
             </div>
           </div>
-          <div class="mt-1 text-[11px] theme-warning opacity-80">执行时间：{{ task.executeAt }}</div>
+          <div class="mt-1 text-[11px] theme-warning opacity-80">
+            执行时间：{{ task.executeAt }}
+          </div>
           <div v-if="task.lastResult" class="mt-1 text-[11px] theme-warning opacity-70">
             结果：{{ task.lastResult }}
           </div>
@@ -1049,8 +1055,10 @@ function resolveBadge(item) {
 
   if (activeMainTab.value === 'history') {
     const signStatus = String(item.signStatus);
-    if (signStatus === '1') return createBadge('已完成', 'theme-success-bg theme-success-border theme-success');
-    if (signStatus === '3') return createBadge('未签退', 'theme-warning-bg theme-warning-border theme-warning');
+    if (signStatus === '1')
+      return createBadge('已完成', 'theme-success-bg theme-success-border theme-success');
+    if (signStatus === '3')
+      return createBadge('未签退', 'theme-warning-bg theme-warning-border theme-warning');
     return createBadge('未签到', 'badge-neutral');
   }
 
@@ -2047,7 +2055,7 @@ async function copyUrl() {
 <style scoped>
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: all 180ms ease;
+  transition: all var(--theme-transition-fast) var(--theme-transition-easing);
 }
 
 .fade-slide-enter-from,
@@ -2104,5 +2112,10 @@ async function copyUrl() {
 
 .club-skeleton-line {
   background-color: var(--card-soft-bg);
+}
+
+.club-toolbar-elevated {
+  position: relative;
+  z-index: 40;
 }
 </style>
